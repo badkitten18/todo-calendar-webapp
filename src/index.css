@@ -1,3 +1,141 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Global styles */
+:root {
+  --primary-color: #3b82f6;
+  --secondary-color: #10b981;
+  --danger-color: #ef4444;
+  --warning-color: #f59e0b;
+  --text-color: #1f2937;
+  --background-color: #f9fafb;
+  --border-color: #e5e7eb;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Base styles */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  margin: 0;
+  padding: 0;
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* High contrast mode improvements */
+@media (forced-colors: active) {
+  .calendar-day-selected {
+    outline: 2px solid CanvasText;
+  }
+  
+  .todo-completed {
+    text-decoration: line-through;
+  }
+  
+  .calendar-day-today {
+    border: 2px solid CanvasText;
+  }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary-color: #60a5fa;
+    --secondary-color: #34d399;
+    --danger-color: #f87171;
+    --warning-color: #fbbf24;
+    --text-color: #f3f4f6;
+    --background-color: #1f2937;
+    --border-color: #374151;
+    --shadow-color: rgba(0, 0, 0, 0.25);
+  }
+}
+
+/* Mobile-first responsive components */
+@layer components {
+  /* Calendar components */
+  .calendar-header {
+    @apply flex justify-between items-center p-4 border-b border-gray-200 bg-white;
+  }
+  
+  .calendar-grid {
+    @apply grid grid-cols-7 border-b border-gray-200;
+  }
+  
+  .calendar-day {
+    @apply aspect-square p-1 border border-gray-100 relative;
+  }
+  
+  /* Todo components */
+  .todo-item {
+    @apply flex items-center gap-2 p-2 border-b border-gray-100 transition-all;
+  }
+  
+  .todo-form {
+    @apply space-y-4 p-4;
+  }
+  
+  /* Modal components */
+  .modal-overlay {
+    @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50;
+  }
+  
+  .modal-content {
+    @apply bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-auto;
+  }
+  
+  /* Button variants */
+  .btn {
+    @apply px-4 py-2 rounded font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors;
+  }
+  
+  .btn-primary {
+    @apply bg-blue-500 text-white hover:bg-blue-600 focus:ring-blue-500;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-500;
+  }
+  
+  .btn-danger {
+    @apply bg-red-500 text-white hover:bg-red-600 focus:ring-red-500;
+  }
+  
+  /* Form controls */
+  .form-input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+  }
+  
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 mb-1;
+  }
+  
+  /* Mobile optimizations */
+  @media (max-width: 640px) {
+    .btn {
+      @apply px-3 py-1.5 text-sm;
+    }
+    
+    .modal-content {
+      @apply max-w-full rounded-none;
+    }
+    
+    .calendar-header {
+      @apply p-2;
+    }
+  }
+}

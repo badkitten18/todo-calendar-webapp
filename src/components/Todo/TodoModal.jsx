@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, ModalBody, Button } from '../UI';
+import { Modal, ModalBody, Button, FormError } from '../UI';
 import TodoList from './TodoList';
 import TodoForm from './TodoForm';
 import { formatFullDate } from '../../utils/dateUtils';
+import { useError } from '../../contexts/ErrorContext';
 
 /**
  * TodoModal component - Modal container for todo operations
@@ -13,6 +14,8 @@ import { formatFullDate } from '../../utils/dateUtils';
  * @param {Array} props.todos - Todos for the selected date
  * @param {function} props.onTodoUpdate - Function to handle todo changes (add, update, delete, toggle)
  * @param {boolean} props.isLoading - Whether modal is in loading state
+ * @param {string|Error} props.error - Error message or Error object
+ * @param {object} props.operationStatus - Status of the current operation
  */
 const TodoModal = ({
   isOpen,
@@ -20,11 +23,17 @@ const TodoModal = ({
   selectedDate,
   todos = [],
   onTodoUpdate,
-  isLoading = false
+  isLoading = false,
+  error = null,
+  operationStatus = {}
 }) => {
   const [currentView, setCurrentView] = useState('list'); // 'list' or 'form'
   const [editingTodo, setEditingTodo] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
+  const [modalError, setModalError] = useState(null);
+  
+  // Get global error handler
+  const { handleError } = useError();
 
   // Reset view when modal opens/closes
   useEffect(() => {
@@ -32,19 +41,29 @@ const TodoModal = ({
       setCurrentView('list');
       setEditingTodo(null);
       setFormLoading(false);
+      setModalError(null);
     }
   }, [isOpen]);
+
+  // Update modal error when props error changes
+  useEffect(() => {
+    if (error) {
+      setModalError(error);
+    }
+  }, [error]);
 
   // Handle adding new todo
   const handleAddTodo = () => {
     setEditingTodo(null);
     setCurrentView('form');
+    setModalError(null);
   };
 
   // Handle editing existing todo
   const handleEditTodo = (todo) => {
     setEditingTodo(todo);
     setCurrentView('form');
+    setModalError(null);
   };
 
   // Handle form submission (add or update)
@@ -52,6 +71,8 @@ const TodoModal = ({
     if (!onTodoUpdate) return;
 
     setFormLoading(true);
+    setModalError(null);
+    
     try {
       if (editingTodo) {
         // Update existing todo
@@ -73,7 +94,14 @@ const TodoModal = ({
       setCurrentView('list');
       setEditingTodo(null);
     } catch (error) {
-      // Error handling is done in the form component
+      // Set modal error
+      setModalError(error);
+      
+      // Log error to global error handler but don't show notification
+      // since we're showing the error in the form
+      handleError(error, 'TodoModal:formSubmit');
+      
+      // Re-throw to let the form handle the error display
       throw error;
     } finally {
       setFormLoading(false);
@@ -85,6 +113,7 @@ const TodoModal = ({
     setCurrentView('list');
     setEditingTodo(null);
     setFormLoading(false);
+    setModalError(null);
   };
 
   // Handle todo completion toggle
@@ -94,7 +123,8 @@ const TodoModal = ({
     try {
       await onTodoUpdate('toggle', todoId);
     } catch (error) {
-      console.error('Failed to toggle todo completion:', error);
+      setModalError(error);
+      handleError(error, 'TodoModal:toggleComplete');
     }
   };
 
@@ -105,7 +135,8 @@ const TodoModal = ({
     try {
       await onTodoUpdate('delete', todoId);
     } catch (error) {
-      console.error('Failed to delete todo:', error);
+      setModalError(error);
+      handleError(error, 'TodoModal:deleteTodo');
     }
   };
 
@@ -116,6 +147,7 @@ const TodoModal = ({
     setCurrentView('list');
     setEditingTodo(null);
     setFormLoading(false);
+    setModalError(null);
     onClose();
   };
 
@@ -155,6 +187,44 @@ const TodoModal = ({
     >
       <div onKeyDown={handleKeyDown}>
         <ModalBody className="p-0">
+          {/* Error display */}
+          {modalError && currentView === 'list' && (
+            <div className="px-6 pt-6 pb-0">
+              <FormError error={modalError} />
+            </div>
+          )}
+          
+          {/* Success message */}
+          {operationStatus.success && currentView === 'list' && (
+            <div className="px-6 pt-6 pb-0">
+              <div className="p-3 bg-green-50 border border-green-200 rounded-md mb-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg 
+                      className="h-5 w-5 text-green-400" 
+                      fill="currentColor" 
+                      viewBox="0 0 20 20"
+                    >
+                      <path 
+                        fillRule="evenodd" 
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" 
+                        clipRule="evenodd" 
+                      />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm font-medium text-green-800">
+                      {operationStatus.action === 'add' && 'Todo added successfully'}
+                      {operationStatus.action === 'update' && 'Todo updated successfully'}
+                      {operationStatus.action === 'delete' && 'Todo deleted successfully'}
+                      {operationStatus.action === 'toggle' && 'Todo status updated successfully'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {currentView === 'list' ? (
             <div className="p-6">
               {/* Add Todo Button */}

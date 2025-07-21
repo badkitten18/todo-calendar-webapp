@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Input, Textarea } from '../UI';
+import { Button, Input, Textarea, FormError } from '../UI';
 import { formatFullDate } from '../../utils/dateUtils';
+import { validateFormData, ValidationError } from '../../utils/errorUtils';
+import { useError } from '../../contexts/ErrorContext';
 
 /**
  * TodoForm component for adding and editing todos
@@ -24,6 +26,10 @@ const TodoForm = ({
   });
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
+  const [submitError, setSubmitError] = useState(null);
+  
+  // Get global error handler
+  const { handleError } = useError();
 
   // Initialize form data when todo prop changes
   useEffect(() => {
@@ -40,26 +46,28 @@ const TodoForm = ({
     }
     setErrors({});
     setTouched({});
+    setSubmitError(null);
   }, [todo]);
+
+  // Validation rules
+  const validationRules = {
+    title: {
+      required: true,
+      requiredMessage: 'Title is required',
+      maxLength: 100,
+      maxLengthMessage: 'Title must be 100 characters or less'
+    },
+    description: {
+      maxLength: 500,
+      maxLengthMessage: 'Description must be 500 characters or less'
+    }
+  };
 
   // Validation function
   const validateForm = () => {
-    const newErrors = {};
-
-    // Title validation
-    if (!formData.title.trim()) {
-      newErrors.title = 'Title is required';
-    } else if (formData.title.trim().length > 100) {
-      newErrors.title = 'Title must be 100 characters or less';
-    }
-
-    // Description validation (optional but with length limit)
-    if (formData.description.length > 500) {
-      newErrors.description = 'Description must be 500 characters or less';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    const result = validateFormData(formData, validationRules);
+    setErrors(result.errors);
+    return result.isValid;
   };
 
   // Handle input changes
@@ -77,6 +85,11 @@ const TodoForm = ({
         [field]: ''
       }));
     }
+    
+    // Clear submit error when user makes changes
+    if (submitError) {
+      setSubmitError(null);
+    }
   };
 
   // Handle input blur (for validation feedback)
@@ -92,6 +105,16 @@ const TodoForm = ({
         ...prev,
         title: 'Title is required'
       }));
+    } else if (field === 'title' && formData.title.trim().length > 100) {
+      setErrors(prev => ({
+        ...prev,
+        title: 'Title must be 100 characters or less'
+      }));
+    } else if (field === 'description' && formData.description.length > 500) {
+      setErrors(prev => ({
+        ...prev,
+        description: 'Description must be 500 characters or less'
+      }));
     }
   };
 
@@ -104,6 +127,9 @@ const TodoForm = ({
       title: true,
       description: true
     });
+
+    // Clear previous submit error
+    setSubmitError(null);
 
     // Validate form
     if (!validateForm()) {
@@ -118,9 +144,11 @@ const TodoForm = ({
       });
     } catch (error) {
       // Handle submission errors
-      setErrors({
-        submit: error.message || 'Failed to save todo'
-      });
+      setSubmitError(error);
+      
+      // Log error to global error handler but don't show notification
+      // since we're showing the error in the form
+      handleError(error, 'TodoForm:submit');
     }
   };
 
@@ -171,6 +199,7 @@ const TodoForm = ({
           disabled={isLoading}
           className="w-full"
           maxLength={100}
+          aria-invalid={touched.title && errors.title ? 'true' : 'false'}
         />
 
         {/* Description Textarea */}
@@ -185,13 +214,12 @@ const TodoForm = ({
           rows={3}
           maxLength={500}
           helperText={`${formData.description.length}/500 characters`}
+          aria-invalid={touched.description && errors.description ? 'true' : 'false'}
         />
 
         {/* Submit Error */}
-        {errors.submit && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-sm text-red-600">{errors.submit}</p>
-          </div>
+        {submitError && (
+          <FormError error={submitError} />
         )}
 
         {/* Form Actions */}

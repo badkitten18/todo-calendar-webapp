@@ -1,42 +1,136 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* App container styles */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Calendar specific styles */
+.calendar-container {
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  .calendar-container {
+    margin-left: -1rem;
+    margin-right: -1rem;
+    border-radius: 0;
   }
-  to {
-    transform: rotate(360deg);
+  
+  .calendar-day {
+    min-height: 2.5rem;
+    font-size: 0.875rem;
+  }
+  
+  .calendar-header h2 {
+    font-size: 1.25rem;
+  }
+  
+  .todo-modal {
+    padding: 1rem;
+  }
+  
+  .todo-modal-content {
+    max-height: 80vh;
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+/* Tablet optimizations */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .calendar-day {
+    min-height: 3rem;
   }
 }
 
-.card {
-  padding: 2em;
+/* Animation for todo items */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.read-the-docs {
-  color: #888;
+.todo-item-enter {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+/* Focus styles for accessibility */
+:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Touch optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .calendar-day,
+  .calendar-nav-button,
+  .todo-item-actions button {
+    padding: 0.5rem;
+    min-height: 44px; /* Minimum touch target size */
+  }
+  
+  .calendar-day-content {
+    padding: 0.25rem;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .app-container {
+    background-color: #1f2937;
+    color: #f3f4f6;
+  }
+  
+  .calendar-container {
+    background-color: #111827;
+    border-color: #374151;
+  }
+  
+  .calendar-day {
+    border-color: #374151;
+  }
+  
+  .calendar-day-today {
+    background-color: #374151;
+  }
+  
+  .calendar-day-selected {
+    background-color: #2563eb;
+  }
+}
+
+/* Print styles */
+@media print {
+  .app-container {
+    background-color: white;
+    padding: 0;
+  }
+  
+  header, footer {
+    display: none;
+  }
+  
+  .calendar-container {
+    box-shadow: none;
+    border: none;
+  }
+  
+  .calendar-day {
+    border: 1px solid #e5e7eb;
+  }
+  
+  .todo-item-actions {
+    display: none;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

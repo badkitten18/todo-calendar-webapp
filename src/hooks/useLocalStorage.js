@@ -1,10 +1,15 @@
 import { useState, useEffect } from 'react';
+import { 
+  StorageError, 
+  handleStorageOperation, 
+  logError 
+} from '../utils/errorUtils';
 
 /**
  * Custom hook for managing localStorage with React state
  * @param {string} key - The localStorage key
  * @param {*} initialValue - Default value if key doesn't exist
- * @returns {[*, function]} - [value, setValue] tuple
+ * @returns {[*, function, object]} - [value, setValue, status] tuple
  */
 export const useLocalStorage = (key, initialValue) => {
   // State to store our value
@@ -14,22 +19,27 @@ export const useLocalStorage = (key, initialValue) => {
       return initialValue;
     }
 
-    try {
+    return handleStorageOperation(() => {
       // Get from local storage by key
       const item = window.localStorage.getItem(key);
       // Parse stored json or if none return initialValue
       return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
-      // If error also return initialValue
-      console.warn(`Error reading localStorage key "${key}":`, error);
-      return initialValue;
-    }
+    }, `getItem:${key}`);
+  });
+
+  // Status object to track operations
+  const [status, setStatus] = useState({
+    loading: false,
+    error: null,
+    lastUpdated: null
   });
 
   // Return a wrapped version of useState's setter function that ...
   // ... persists the new value to localStorage.
   const setValue = (value) => {
     try {
+      setStatus({ loading: true, error: null, lastUpdated: null });
+      
       // Allow value to be a function so we have the same API as useState
       const valueToStore = value instanceof Function ? value(storedValue) : value;
       
@@ -38,11 +48,28 @@ export const useLocalStorage = (key, initialValue) => {
       
       // Save to local storage
       if (typeof window !== 'undefined') {
-        window.localStorage.setItem(key, JSON.stringify(valueToStore));
+        handleStorageOperation(() => {
+          window.localStorage.setItem(key, JSON.stringify(valueToStore));
+        }, `setItem:${key}`);
       }
+      
+      setStatus({ 
+        loading: false, 
+        error: null, 
+        lastUpdated: new Date().toISOString() 
+      });
+      
+      return true;
     } catch (error) {
-      // A more advanced implementation would handle the error case
-      console.error(`Error setting localStorage key "${key}":`, error);
+      logError(error, `useLocalStorage:setValue:${key}`);
+      
+      setStatus({ 
+        loading: false, 
+        error: error instanceof StorageError ? error : new StorageError(error.message, `setValue:${key}`),
+        lastUpdated: null
+      });
+      
+      return false;
     }
   };
 
@@ -57,8 +84,19 @@ export const useLocalStorage = (key, initialValue) => {
         try {
           const newValue = JSON.parse(e.newValue);
           setStoredValue(newValue);
+          setStatus({
+            loading: false,
+            error: null,
+            lastUpdated: new Date().toISOString(),
+            source: 'external'
+          });
         } catch (error) {
-          console.warn(`Error parsing localStorage change for key "${key}":`, error);
+          logError(error, `useLocalStorage:handleStorageChange:${key}`);
+          setStatus({
+            loading: false,
+            error: new StorageError(error.message, `parseStorageEvent:${key}`),
+            lastUpdated: null
+          });
         }
       }
     };
@@ -72,12 +110,12 @@ export const useLocalStorage = (key, initialValue) => {
     };
   }, [key]);
 
-  return [storedValue, setValue];
+  return [storedValue, setValue, status];
 };
 
 /**
  * Hook specifically for managing todos in localStorage
- * @returns {[object, function]} - [todos, setTodos] tuple
+ * @returns {[object, function, object]} - [todos, setTodos, status] tuple
  */
 export const useTodosStorage = () => {
   return useLocalStorage('todos', {});
@@ -85,7 +123,7 @@ export const useTodosStorage = () => {
 
 /**
  * Hook for managing calendar settings in localStorage
- * @returns {[object, function]} - [settings, setSettings] tuple
+ * @returns {[object, function, object]} - [settings, setSettings, status] tuple
  */
 export const useCalendarSettings = () => {
   const defaultSettings = {
@@ -99,19 +137,26 @@ export const useCalendarSettings = () => {
 
 /**
  * Utility function to clear all app data from localStorage
+ * @returns {boolean} - True if successful, false otherwise
  */
 export const clearAppData = () => {
   if (typeof window === 'undefined') {
-    return;
+    return false;
   }
 
   try {
     const keysToRemove = ['todos', 'calendarSettings'];
-    keysToRemove.forEach(key => {
-      window.localStorage.removeItem(key);
-    });
+    
+    handleStorageOperation(() => {
+      keysToRemove.forEach(key => {
+        window.localStorage.removeItem(key);
+      });
+    }, 'clearAppData');
+    
+    return true;
   } catch (error) {
-    console.error('Error clearing app data:', error);
+    logError(error, 'clearAppData');
+    return false;
   }
 };
 
@@ -136,14 +181,25 @@ export const isLocalStorageAvailable = () => {
 
 /**
  * Hook to get localStorage availability status
- * @returns {boolean} - True if localStorage is available
+ * @returns {object} - { isAvailable, error }
  */
 export const useLocalStorageAvailable = () => {
-  const [isAvailable, setIsAvailable] = useState(false);
+  const [status, setStatus] = useState({
+    isAvailable: false,
+    error: null
+  });
 
   useEffect(() => {
-    setIsAvailable(isLocalStorageAvailable());
+    try {
+      const available = isLocalStorageAvailable();
+      setStatus({ isAvailable: available, error: null });
+    } catch (error) {
+      setStatus({ 
+        isAvailable: false, 
+        error: new StorageError(error.message, 'checkAvailability')
+      });
+    }
   }, []);
 
-  return isAvailable;
+  return status;
 };
