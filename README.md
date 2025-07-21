@@ -48,9 +48,15 @@ src/
 ├── components/
 │   ├── Calendar/     # Calendar-related components
 │   ├── Todo/         # Todo management components
-│   └── UI/           # Reusable UI components
+│   ├── UI/           # Reusable UI components
+│   └── ErrorBoundary.jsx # Error boundary component
+├── contexts/
+│   └── ErrorContext.jsx # Global error handling context
 ├── hooks/            # Custom React hooks
-├── utils/            # Utility functions
+├── utils/
+│   ├── dateUtils.js  # Date-related utilities
+│   ├── errorUtils.js # Error handling utilities
+│   └── todoUtils.js  # Todo-related utilities
 ├── __tests__/        # Test files
 └── test/             # Test configuration
 ```
@@ -63,7 +69,22 @@ src/
 - Navigate between months
 - Responsive design for mobile, tablet, and desktop
 - Local storage persistence
+- Comprehensive error handling
+- Form validation
+- Error notifications
 
 ## Development
 
 This project follows a component-based architecture with custom hooks for state management and utility functions for common operations.
+
+## Error Handling
+
+The application implements a comprehensive error handling strategy:
+
+- **ErrorBoundary**: Catches and displays errors in the component tree
+- **ErrorContext**: Provides global error state management
+- **FormError**: Displays form validation errors
+- **ErrorNotification**: Shows global error notifications
+- **Custom Error Classes**: Specialized error types for different scenarios
+
+See the [Error Handling Guide](./docs/error-handling.md) for more details.
