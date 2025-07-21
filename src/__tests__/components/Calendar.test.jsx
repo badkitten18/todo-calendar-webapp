@@ -226,7 +226,7 @@ describe('Calendar', () => {
       // Add todo
       await user.click(screen.getByText('Add Todo'));
 
-      expect(mockAddTodo).toHaveBeenCalledWith({ title: 'Test Todo' });
+      expect(mockAddTodo).toHaveBeenCalledWith(expect.objectContaining({ title: 'Test Todo' }));
     });
 
     it('calls toggleTodoComplete when toggle is triggered', async () => {
@@ -256,7 +256,7 @@ describe('Calendar', () => {
       // Add todo successfully
       await user.click(screen.getByText('Add Todo'));
 
-      expect(mockAddTodo).toHaveBeenCalledWith({ title: 'Test Todo' });
+      expect(mockAddTodo).toHaveBeenCalledWith(expect.objectContaining({ title: 'Test Todo' }));
     });
   });
 

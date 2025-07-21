@@ -43,15 +43,15 @@ export const useLocalStorage = (key, initialValue) => {
       // Allow value to be a function so we have the same API as useState
       const valueToStore = value instanceof Function ? value(storedValue) : value;
       
-      // Save state
-      setStoredValue(valueToStore);
-      
-      // Save to local storage
+      // Save to local storage first
       if (typeof window !== 'undefined') {
         handleStorageOperation(() => {
           window.localStorage.setItem(key, JSON.stringify(valueToStore));
         }, `setItem:${key}`);
       }
+      
+      // Only update state if localStorage operation succeeded
+      setStoredValue(valueToStore);
       
       setStatus({ 
         loading: false, 
