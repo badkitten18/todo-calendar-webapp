@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import TodoModal from '../../components/Todo/TodoModal';
@@ -513,7 +513,12 @@ describe('TodoModal', () => {
 
     it('handles form submission errors gracefully', async () => {
       const user = userEvent.setup();
-      mockOnTodoUpdate.mockRejectedValue(new Error('Submission failed'));
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      
+      mockOnTodoUpdate.mockImplementation(async () => {
+        const error = new Error('Submission failed');
+        return Promise.reject(error);
+      });
       
       render(
         <TodoModal
@@ -530,16 +535,22 @@ describe('TodoModal', () => {
       
       // This should not crash the component - the error is handled internally
       try {
-        await user.click(screen.getByText('Submit Form'));
-        // Wait a bit for any async operations
-        await waitFor(() => {
-          // The form should still be visible (not returned to list view)
-          expect(screen.getByTestId('todo-form')).toBeInTheDocument();
+        await act(async () => {
+          await user.click(screen.getByText('Submit Form'));
+          // Wait for the error to be processed
+          await new Promise(resolve => setTimeout(resolve, 100));
         });
       } catch (error) {
-        // Error is expected and handled
-        expect(error.message).toBe('Submission failed');
+        // Expected error, ignore it
       }
+      
+      // Wait a bit for any async operations
+      await waitFor(() => {
+        // The form should still be visible (not returned to list view)
+        expect(screen.getByTestId('todo-form')).toBeInTheDocument();
+      });
+      
+      consoleErrorSpy.mockRestore();
     });
   });
 

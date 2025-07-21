@@ -1,6 +1,6 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, act } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import App from '../../App';
 
 // Mock window.matchMedia for testing responsive behavior
@@ -50,7 +50,9 @@ describe('Responsive Integration', () => {
       const { container } = render(<App />);
       
       // Fast-forward timer to complete loading
-      vi.advanceTimersByTime(600);
+      act(() => {
+        vi.advanceTimersByTime(600);
+      });
       
       // Check for mobile-specific padding
       expect(container.querySelector('.app-container')).toHaveClass('p-4');
@@ -70,7 +72,9 @@ describe('Responsive Integration', () => {
       const { container } = render(<App />);
       
       // Fast-forward timer to complete loading
-      vi.advanceTimersByTime(600);
+      act(() => {
+        vi.advanceTimersByTime(600);
+      });
       
       // Check for tablet-specific padding
       expect(container.querySelector('.app-container')).toHaveClass('sm:p-6');
@@ -87,7 +91,9 @@ describe('Responsive Integration', () => {
       const { container } = render(<App />);
       
       // Fast-forward timer to complete loading
-      vi.advanceTimersByTime(600);
+      act(() => {
+        vi.advanceTimersByTime(600);
+      });
       
       // Check for desktop-specific padding
       expect(container.querySelector('.app-container')).toHaveClass('md:p-8');
@@ -99,7 +105,9 @@ describe('Responsive Integration', () => {
       const { container } = render(<App />);
       
       // Fast-forward timer to complete loading
-      vi.advanceTimersByTime(600);
+      act(() => {
+        vi.advanceTimersByTime(600);
+      });
       
       // Check for responsive container classes
       expect(container.querySelector('.app-container')).toHaveClass('min-h-screen', 'bg-gray-50');

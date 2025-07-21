@@ -1,6 +1,6 @@
 import React from 'react';
-import { render } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, act } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import App from '../../App';
 
 // Mock the Calendar component
@@ -42,7 +42,9 @@ describe('Responsive Design', () => {
     const { container } = render(<App />);
     
     // Fast-forward timer to complete loading
-    vi.advanceTimersByTime(600);
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
     
     expect(container.firstChild).toHaveClass('min-h-screen', 'bg-gray-50', 'p-4', 'sm:p-6', 'md:p-8');
   });
@@ -51,7 +53,9 @@ describe('Responsive Design', () => {
     const { getByRole } = render(<App />);
     
     // Fast-forward timer to complete loading
-    vi.advanceTimersByTime(600);
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
     
     expect(getByRole('main')).toHaveClass('max-w-5xl', 'mx-auto');
   });
@@ -72,7 +76,9 @@ describe('Responsive Design', () => {
     const { container } = render(<App />);
     
     // Fast-forward timer to complete loading
-    vi.advanceTimersByTime(600);
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
     
     // Check for responsive classes
     expect(container.firstChild).toHaveClass('p-4', 'sm:p-6', 'md:p-8');
@@ -83,7 +89,9 @@ describe('Responsive Design', () => {
     const { container } = render(<App />);
     
     // Fast-forward timer to complete loading
-    vi.advanceTimersByTime(600);
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
     
     // Check for responsive padding classes
     expect(container.firstChild).toHaveClass('p-4', 'sm:p-6', 'md:p-8');

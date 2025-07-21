@@ -111,7 +111,15 @@ const Calendar = ({
           result = await toggleTodoComplete(todoId);
           break;
         default:
-          throw new Error(`Unknown todo action: ${action}`);
+          const error = new Error(`Unknown todo action: ${action}`);
+          console.error('Invalid todo action:', action);
+          setOperationStatus({
+            loading: false,
+            error: error.message,
+            success: false,
+            action
+          });
+          return Promise.reject(error);
       }
       
       setOperationStatus({
@@ -133,7 +141,7 @@ const Calendar = ({
         action
       });
       
-      throw error; // Re-throw to let the modal handle the error display
+      return Promise.reject(error); // Return rejected promise instead of throwing
     }
   }, [addTodo, updateTodo, deleteTodo, toggleTodoComplete, selectedDate]);
 

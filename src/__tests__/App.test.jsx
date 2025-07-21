@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import App from '../App';
 
@@ -49,7 +49,9 @@ describe('App', () => {
     const { rerender } = render(<App />);
     
     // Fast-forward timer to complete loading
-    vi.advanceTimersByTime(600);
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
     
     // Force a re-render to apply the state change
     rerender(<App />);

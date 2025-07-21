@@ -21,7 +21,7 @@ import { formatDateKey } from '../utils/dateUtils';
  * @returns {object} Todos state and CRUD operations
  */
 export const useTodos = () => {
-  const [todos, setTodos] = useTodosStorage();
+  const [todos, setTodos, status] = useTodosStorage();
 
   /**
    * Add a new todo

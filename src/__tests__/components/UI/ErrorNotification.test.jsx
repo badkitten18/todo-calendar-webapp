@@ -102,7 +102,9 @@ describe('ErrorNotification', () => {
     
     // Click dismiss button
     const dismissButton = screen.getByLabelText('Dismiss');
-    dismissButton.click();
+    act(() => {
+      dismissButton.click();
+    });
     
     // Wait for fade-out animation
     act(() => {

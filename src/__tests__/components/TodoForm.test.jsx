@@ -110,7 +110,8 @@ describe('TodoForm', () => {
       const { getFormElements } = renderComponent();
       
       const { titleInput } = getFormElements();
-      await userEvent.type(titleInput, 'a'.repeat(101));
+      // Since maxLength prevents typing more than 100 chars, we need to set the value directly
+      fireEvent.change(titleInput, { target: { value: 'a'.repeat(101) } });
       fireEvent.blur(titleInput);
       
       expect(screen.getByText('Title must be 100 characters or less')).toBeInTheDocument();
@@ -120,7 +121,8 @@ describe('TodoForm', () => {
       const { getFormElements } = renderComponent();
       
       const { descriptionInput } = getFormElements();
-      await userEvent.type(descriptionInput, 'a'.repeat(501));
+      // Since maxLength prevents typing more than 500 chars, we need to set the value directly
+      fireEvent.change(descriptionInput, { target: { value: 'a'.repeat(501) } });
       fireEvent.blur(descriptionInput);
       
       expect(screen.getByText('Description must be 500 characters or less')).toBeInTheDocument();
@@ -161,6 +163,10 @@ describe('TodoForm', () => {
       
       const { titleInput, descriptionInput, submitButton } = getFormElements();
       
+      // Clear any existing values first
+      await userEvent.clear(titleInput);
+      await userEvent.clear(descriptionInput);
+      
       await userEvent.type(titleInput, 'New Todo');
       await userEvent.type(descriptionInput, 'Todo Description');
       
@@ -178,6 +184,10 @@ describe('TodoForm', () => {
       
       const { titleInput, descriptionInput, submitButton } = getFormElements();
       
+      // Clear any existing values first
+      await userEvent.clear(titleInput);
+      await userEvent.clear(descriptionInput);
+      
       await userEvent.type(titleInput, '  New Todo  ');
       await userEvent.type(descriptionInput, '  Todo Description  ');
       
@@ -194,7 +204,12 @@ describe('TodoForm', () => {
       const { getFormElements } = renderComponent();
       
       const { titleInput, submitButton } = getFormElements();
-      await userEvent.type(titleInput, 'a'.repeat(101));
+      
+      // Clear any existing values first
+      await userEvent.clear(titleInput);
+      
+      // Set a value that's too long directly since maxLength prevents typing
+      fireEvent.change(titleInput, { target: { value: 'a'.repeat(101) } });
       
       await userEvent.click(submitButton);
       
