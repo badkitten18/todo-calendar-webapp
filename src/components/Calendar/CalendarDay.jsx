@@ -1,5 +1,5 @@
 import React from 'react';
-import { isToday, isSameDay, isCurrentMonth, formatDateKey } from '../../utils/dateUtils';
+import { isToday, isCurrentMonth, formatDateKey } from '../../utils/dateUtils';
 
 /**
  * CalendarDay component - Individual day cell in the calendar

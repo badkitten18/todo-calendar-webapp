@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useTodosStorage } from './useLocalStorage';
 import {
   createTodo,
-  updateTodo,
+
   addTodoToCollection,
   updateTodoInCollection,
   removeTodoFromCollection,
@@ -21,7 +21,7 @@ import { formatDateKey } from '../utils/dateUtils';
  * @returns {object} Todos state and CRUD operations
  */
 export const useTodos = () => {
-  const [todos, setTodos, status] = useTodosStorage();
+  const [todos, setTodos] = useTodosStorage();
 
   /**
    * Add a new todo

@@ -453,16 +453,12 @@ describe('Calendar-Todo Integration', () => {
       // Open modal
       await user.click(screen.getByText('Click Date'));
 
-      // Try to add todo - catch the expected error
-      try {
-        await act(async () => {
-          await user.click(screen.getByText('Add Todo'));
-          // Wait for the error to be processed
-          await new Promise(resolve => setTimeout(resolve, 100));
-        });
-      } catch (error) {
-        // Expected error, ignore it
-      }
+      // Try to add todo - the error should be caught by the component
+      await act(async () => {
+        await user.click(screen.getByText('Add Todo'));
+        // Wait for the error to be processed
+        await new Promise(resolve => setTimeout(resolve, 100));
+      });
 
       // Calendar should still be functional
       expect(screen.getByTestId('calendar-header')).toBeInTheDocument();

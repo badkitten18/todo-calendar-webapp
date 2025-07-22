@@ -102,7 +102,7 @@ const TodoModal = ({
       handleError(error, 'TodoModal:formSubmit');
       
       // Don't re-throw, just handle the error gracefully
-      return Promise.reject(error);
+      // The error is already set in modalError state
     } finally {
       setFormLoading(false);
     }
